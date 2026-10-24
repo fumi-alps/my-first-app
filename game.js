@@ -193,27 +193,63 @@ function loseLife() {
 
 function drawBackground() {
   const sky = context.createLinearGradient(0, 0, 0, HEIGHT);
-  sky.addColorStop(0, "#a4e7ee");
-  sky.addColorStop(1, "#e0f3d7");
+  sky.addColorStop(0, "#10142f");
+  sky.addColorStop(0.58, "#29204d");
+  sky.addColorStop(1, "#8a3c68");
   context.fillStyle = sky;
   context.fillRect(0, 0, WIDTH, HEIGHT);
 
   for (const star of stars) {
     const x = star.x - cameraX * 0.18;
     const wrappedX = ((x % (WIDTH + 80)) + WIDTH + 80) % (WIDTH + 80) - 40;
-    context.fillStyle = "rgba(255, 255, 255, 0.55)";
+    context.fillStyle = "rgba(215, 225, 255, 0.7)";
+    context.shadowColor = "#9aaaff";
+    context.shadowBlur = 8;
     context.beginPath();
     context.arc(wrappedX, star.y, star.size, 0, Math.PI * 2);
     context.fill();
   }
+  context.shadowBlur = 0;
 
-  drawHillLayer("#83d2c4", 390, 0.2, 120);
-  drawHillLayer("#55b8a5", 430, 0.38, 180);
-
-  context.fillStyle = "#f7cf74";
+  const moonX = 755 - cameraX * 0.06;
+  context.fillStyle = "rgba(255, 197, 230, 0.12)";
   context.beginPath();
-  context.arc(760 - cameraX * 0.08, 100, 38, 0, Math.PI * 2);
+  context.arc(moonX, 112, 61, 0, Math.PI * 2);
   context.fill();
+  context.fillStyle = "#ffd6e8";
+  context.beginPath();
+  context.arc(moonX, 112, 42, 0, Math.PI * 2);
+  context.fill();
+  context.fillStyle = "#e9aaca";
+  context.beginPath();
+  context.arc(moonX - 11, 101, 5, 0, Math.PI * 2);
+  context.arc(moonX + 13, 124, 8, 0, Math.PI * 2);
+  context.fill();
+
+  drawCityLayer("#20203f", 0.16, 34, 120);
+  drawHillLayer("#34305d", 390, 0.2, 120);
+  drawHillLayer("#263653", 430, 0.38, 180);
+  drawCityLayer("#1d3047", 0.48, 26, 92);
+}
+
+function drawCityLayer(color, parallax, minHeight, spacing) {
+  const offset = cameraX * parallax;
+  const firstBuilding = Math.floor(offset / spacing) - 1;
+  context.fillStyle = color;
+  for (let index = firstBuilding; index < firstBuilding + Math.ceil(WIDTH / spacing) + 3; index += 1) {
+    const worldX = index * spacing;
+    const buildingWidth = spacing * (0.48 + ((Math.abs(index * 7) % 4) + 1) * 0.08);
+    const buildingHeight = minHeight + ((Math.abs(index * 37) % 7) + 1) * 13;
+    const x = worldX - offset;
+    const y = 440 - buildingHeight;
+    context.fillRect(x, y, buildingWidth, buildingHeight);
+    context.fillStyle = "rgba(143, 179, 232, 0.18)";
+    for (let windowY = y + 12; windowY < 430; windowY += 18) {
+      context.fillRect(x + 8, windowY, 3, 5);
+      if (buildingWidth > 54) context.fillRect(x + 19, windowY, 3, 5);
+    }
+    context.fillStyle = color;
+  }
 }
 
 function drawHillLayer(color, baseY, parallax, spacing) {
@@ -236,13 +272,22 @@ function drawPlatforms() {
     const x = platform.x - cameraX;
     if (x + platform.width < -5 || x > WIDTH + 5) continue;
 
-    context.fillStyle = "#397d68";
+    const ground = context.createLinearGradient(0, platform.y, 0, platform.y + platform.height);
+    ground.addColorStop(0, "#293e59");
+    ground.addColorStop(1, "#18243a");
+    context.fillStyle = ground;
     context.fillRect(x, platform.y, platform.width, platform.height);
-    context.fillStyle = "#73c88d";
-    context.fillRect(x, platform.y, platform.width, 7);
-    context.fillStyle = "rgba(24, 75, 69, 0.2)";
-    for (let pebbleX = x + 14; pebbleX < x + platform.width; pebbleX += 34) {
-      context.fillRect(pebbleX, platform.y + 17, 9, 4);
+    context.fillStyle = "#55f0d0";
+    context.shadowColor = "#39e3c2";
+    context.shadowBlur = 10;
+    context.fillRect(x, platform.y, platform.width, 3);
+    context.shadowBlur = 0;
+    context.fillStyle = "rgba(136, 178, 219, 0.18)";
+    context.fillRect(x, platform.y + 3, platform.width, 2);
+    for (let detailX = x + 15; detailX < x + platform.width - 10; detailX += 42) {
+      context.fillStyle = "rgba(157, 189, 226, 0.19)";
+      context.fillRect(detailX, platform.y + 18, 16, 2);
+      context.fillRect(detailX + 5, platform.y + 28, 7, 2);
     }
   }
 }
@@ -252,17 +297,25 @@ function drawEnemies() {
     if (!enemy.alive) continue;
     const x = enemy.x - cameraX;
     if (x + enemy.width < -10 || x > WIDTH + 10) continue;
-    context.fillStyle = "#c65162";
+    context.save();
+    context.shadowColor = "#ff4d9b";
+    context.shadowBlur = 13;
+    const shell = context.createLinearGradient(x, enemy.y, x, enemy.y + enemy.height);
+    shell.addColorStop(0, "#ff719e");
+    shell.addColorStop(1, "#a72e73");
+    context.fillStyle = shell;
     context.beginPath();
     context.roundRect(x, enemy.y, enemy.width, enemy.height, [12, 12, 6, 6]);
     context.fill();
-    context.fillStyle = "#fff4dc";
-    context.fillRect(x + (enemy.direction > 0 ? 20 : 8), enemy.y + 9, 5, 6);
-    context.fillStyle = "#20263c";
-    context.fillRect(x + (enemy.direction > 0 ? 22 : 10), enemy.y + 11, 2, 3);
-    context.fillStyle = "#8d364c";
-    context.fillRect(x + 6, enemy.y + 25, 7, 5);
-    context.fillRect(x + 22, enemy.y + 25, 7, 5);
+    context.shadowBlur = 0;
+    context.fillStyle = "#fff1fa";
+    context.fillRect(x + (enemy.direction > 0 ? 20 : 8), enemy.y + 8, 7, 8);
+    context.fillStyle = "#451d52";
+    context.fillRect(x + (enemy.direction > 0 ? 23 : 10), enemy.y + 10, 3, 4);
+    context.fillStyle = "#ffb2d2";
+    context.fillRect(x + 6, enemy.y + 25, 8, 5);
+    context.fillRect(x + 22, enemy.y + 25, 8, 5);
+    context.restore();
   }
 }
 
@@ -272,29 +325,73 @@ function drawPlayer() {
     return;
   }
 
-  context.fillStyle = "#263d67";
-  context.fillRect(x + 4, player.y + 16, 22, 30);
-  context.fillStyle = "#f5bd8e";
-  context.fillRect(x + 5, player.y + 2, 20, 20);
-  context.fillStyle = "#e98669";
-  context.fillRect(x + 3, player.y, 24, 8);
-  context.fillRect(x + (player.facing > 0 ? 19 : 1), player.y + 24, 10, 8);
-  context.fillStyle = "#fff7e6";
-  context.fillRect(x + (player.facing > 0 ? 18 : 8), player.y + 9, 5, 6);
-  context.fillStyle = "#263d67";
-  context.fillRect(x + (player.facing > 0 ? 20 : 9), player.y + 11, 2, 3);
-  context.fillStyle = "#283651";
+  context.save();
+  context.globalAlpha = player.invulnerable > 0 ? 0.78 : 1;
+  context.fillStyle = "rgba(7, 12, 28, 0.42)";
+  context.beginPath();
+  context.ellipse(x + 15, player.y + 47, 17, 4, 0, 0, Math.PI * 2);
+  context.fill();
+
+  const direction = player.facing;
+  const cape = context.createLinearGradient(x, player.y + 15, x, player.y + 43);
+  cape.addColorStop(0, "#9c4dff");
+  cape.addColorStop(1, "#452d9f");
+  context.fillStyle = cape;
+  context.beginPath();
+  context.moveTo(x + 8, player.y + 16);
+  context.lineTo(x + 15 - direction * 20, player.y + 39);
+  context.lineTo(x + 24, player.y + 33);
+  context.lineTo(x + 22, player.y + 17);
+  context.closePath();
+  context.fill();
+
+  context.shadowColor = "#6d68ff";
+  context.shadowBlur = 12;
+  const suit = context.createLinearGradient(x + 3, player.y + 18, x + 27, player.y + 42);
+  suit.addColorStop(0, "#384e86");
+  suit.addColorStop(1, "#182440");
+  context.fillStyle = suit;
+  context.beginPath();
+  context.roundRect(x + 4, player.y + 16, 22, 28, 7);
+  context.fill();
+  context.shadowBlur = 0;
+  context.fillStyle = "#55f0d0";
+  context.fillRect(x + 5, player.y + 18, 20, 3);
+  context.fillRect(x + (direction > 0 ? 19 : 7), player.y + 27, 5, 3);
+
+  context.fillStyle = "#e7a8ff";
+  context.beginPath();
+  context.roundRect(x + 6, player.y + 2, 19, 20, 7);
+  context.fill();
+  context.fillStyle = "#b875fa";
+  context.beginPath();
+  context.moveTo(x + 4, player.y + 10);
+  context.lineTo(x + 7, player.y - 2);
+  context.lineTo(x + 16, player.y + 5);
+  context.lineTo(x + 24, player.y - 1);
+  context.lineTo(x + 28, player.y + 11);
+  context.closePath();
+  context.fill();
+  context.fillStyle = "#fff2fb";
+  context.fillRect(x + (direction > 0 ? 17 : 8), player.y + 10, 6, 4);
+  context.fillStyle = "#55f0d0";
+  context.fillRect(x + (direction > 0 ? 20 : 9), player.y + 11, 3, 2);
+
+  context.fillStyle = "#1a2441";
   context.fillRect(x + 3, player.y + 40, 10, 6);
   context.fillRect(x + 17, player.y + 40, 10, 6);
 
   if (player.attackTime > 0) {
-    context.strokeStyle = "#fff2a8";
-    context.lineWidth = 5;
+    context.shadowColor = "#55f0d0";
+    context.shadowBlur = 17;
+    context.strokeStyle = "#a7fff0";
+    context.lineWidth = 4;
     context.beginPath();
     const handX = x + (player.facing > 0 ? player.width : 0);
-    context.arc(handX, player.y + 22, 27, -0.8, 0.8, player.facing < 0);
+    context.arc(handX, player.y + 23, 30, -0.9, 0.9, player.facing < 0);
     context.stroke();
   }
+  context.restore();
 }
 
 function drawHud() {
