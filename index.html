@@ -1,11 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-　　ようこそ私のページへ！    
-</body>
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#10172a" />
+    <title>SKYBOUND — 横スクロールアクション</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="game.js" defer></script>
+  </head>
+  <body>
+    <main class="page">
+      <header class="intro">
+        <p class="eyebrow">MINI GAME / MVP</p>
+        <h1>SKYBOUND <span>小さな冒険</span></h1>
+        <p class="description">ジャンプと攻撃で敵をかわし、ゴールを目指そう。</p>
+      </header>
+
+      <section class="game-card" aria-label="ゲーム画面">
+        <div class="game-topline">
+          <span class="game-label"><span class="live-dot"></span> ADVENTURE MODE</span>
+          <span class="level-label">STAGE 01 <span>—</span> 草原の道</span>
+        </div>
+        <canvas id="game" width="960" height="540" aria-label="横スクロールアクションゲーム">
+          このゲームを遊ぶにはCanvasに対応したブラウザーが必要です。
+        </canvas>
+        <div class="game-footer">
+          <p id="game-status" aria-live="polite">冒険が始まった！ゴールを目指そう。</p>
+          <button id="restart" type="button">最初から遊ぶ <span aria-hidden="true">↻</span></button>
+        </div>
+      </section>
+
+      <section class="controls" aria-label="操作方法">
+        <div class="control">
+          <span class="key">←</span><span class="key">→</span>
+          <p><strong>移動</strong><span>左右キー / A・D</span></p>
+        </div>
+        <div class="control">
+          <span class="key key-wide">SPACE</span>
+          <p><strong>ジャンプ</strong><span>上キー / W でもOK</span></p>
+        </div>
+        <div class="control">
+          <span class="key key-wide">J</span>
+          <p><strong>攻撃</strong><span>近くの敵をたおす</span></p>
+        </div>
+      </section>
+
+      <footer class="page-footer">走って、跳んで、ゴールまで。<span>✦</span></footer>
+    </main>
+  </body>
 </html>
